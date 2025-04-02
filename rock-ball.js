@@ -45,7 +45,7 @@
         draw() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(102, 102, 102, 0.3)'; // 30%透明度灰色
+            ctx.strokeStyle = 'rgba(102, 102, 102, 0.7)'; // 70%透明度灰色
             ctx.lineWidth = 1.5;
             ctx.stroke();
         }
