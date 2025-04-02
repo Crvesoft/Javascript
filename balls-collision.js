@@ -1,4 +1,3 @@
-// rain-effect.js
 (function() {
     // 创建画布
     const canvas = document.createElement('canvas');
