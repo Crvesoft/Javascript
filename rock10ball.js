@@ -1,4 +1,3 @@
-// 初始化雨滴容器
 const rainContainer = document.createElement('div');
 rainContainer.id = 'rain-container';
 document.body.appendChild(rainContainer);
