@@ -1,196 +1,130 @@
-// smooth-balls-collision.js
+// red-balls-collision.js
 (function() {
-    // 配置参数（可根据需要调整）
-    const CONFIG = {
-        BALL_COUNT: 12,             // 球体数量
-        MIN_RADIUS: 20,             // 最小半径(像素)
-        MAX_RADIUS: 45,             // 最大半径(像素)
-        INIT_SPEED: 14,             // 初始速度基数
-        BOUNCE_DAMPING: 0.96,       // 边界碰撞阻尼
-        RESTITUTION: 0.98,          // 碰撞恢复系数
-        AIR_RESISTANCE: 0.0001,     // 空气阻力系数
-        LINE_OPACITY: 0.7,          // 线条透明度
-        COLOR: 'rgba(90,90,90,0.7)' // 球体颜色
-    };
-
     // 初始化画布
     const canvas = document.createElement('canvas');
     document.body.appendChild(canvas);
     const ctx = canvas.getContext('2d');
     
-    // 球体物理类
+    // 球类定义
     class Ball {
         constructor(radius) {
             this.radius = radius;
-            this.mass = Math.PI * radius ** 2; // 按面积计算质量
-            this._resetPosition();
-            this._initVelocity();
-        }
-
-        // 安全位置初始化
-        _resetPosition() {
-            const margin = this.radius * 2;
-            this.x = margin + Math.random() * (canvas.width - margin * 2);
-            this.y = margin + Math.random() * (canvas.height - margin * 2);
-        }
-
-        // 速度初始化
-        _initVelocity() {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = CONFIG.INIT_SPEED * (0.8 + Math.random() * 0.4);
-            this.vx = Math.cos(angle) * speed;
-            this.vy = Math.sin(angle) * speed;
+            this.x = Math.random() * (window.innerWidth - 2 * radius) + radius;
+            this.y = Math.random() * (window.innerHeight - 2 * radius) + radius;
+            this.vx = (Math.random() - 0.5) * 8;
+            this.vy = (Math.random() - 0.5) * 8;
         }
 
         update() {
-            // 应用空气阻力
-            this.vx *= (1 - CONFIG.AIR_RESISTANCE);
-            this.vy *= (1 - CONFIG.AIR_RESISTANCE);
-
-            // 更新位置
             this.x += this.vx;
             this.y += this.vy;
 
-            // 边界碰撞处理
-            this._handleBoundary();
-        }
-
-        // 边界碰撞处理
-        _handleBoundary() {
-            const bounce = (pos, max, r) => {
-                if (pos < r) {
-                    this.vx = Math.abs(this.vx) * CONFIG.BOUNCE_DAMPING;
-                    return r + (r - pos) * 0.1;
-                }
-                if (pos > max - r) {
-                    this.vx = -Math.abs(this.vx) * CONFIG.BOUNCE_DAMPING;
-                    return max - r - (pos - (max - r)) * 0.1;
-                }
-                return pos;
-            };
-            this.x = bounce(this.x, canvas.width, this.radius);
-            this.y = bounce(this.y, canvas.height, this.radius);
+            // 边界碰撞检测
+            if (this.x < this.radius) {
+                this.x = this.radius;
+                this.vx *= -1;
+            } else if (this.x > canvas.width - this.radius) {
+                this.x = canvas.width - this.radius;
+                this.vx *= -1;
+            }
+            if (this.y < this.radius) {
+                this.y = this.radius;
+                this.vy *= -1;
+            } else if (this.y > canvas.height - this.radius) {
+                this.y = canvas.height - this.radius;
+                this.vy *= -1;
+            }
         }
 
         draw() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.strokeStyle = CONFIG.COLOR;
-            ctx.lineWidth = 1.8;
+            ctx.strokeStyle = '#666666'; // 改为红色
+            ctx.lineWidth = 2;
             ctx.stroke();
         }
     }
 
-    // 全局系统
+    // 全局变量
     const balls = [];
     let animationId;
 
-    // 初始化球体（智能防重叠）
+    // 初始化球
     function initBalls() {
-        const radii = [];
-        for(let i=0; i<CONFIG.BALL_COUNT; i++){
-            radii.push(CONFIG.MIN_RADIUS + 
-                      (CONFIG.MAX_RADIUS - CONFIG.MIN_RADIUS) * 
-                      Math.pow(i/(CONFIG.BALL_COUNT-1), 1.5));
+        while (balls.length < 5) {
+            const radius = Math.random() * 20 + 10;
+            const newBall = new Ball(radius);
+            
+            // 检查初始位置是否重叠
+            let valid = true;
+            for (const ball of balls) {
+                const dx = ball.x - newBall.x;
+                const dy = ball.y - newBall.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < ball.radius + newBall.radius) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) balls.push(newBall);
         }
-        radii.sort(() => Math.random() - 0.5);
-
-        radii.forEach(r => {
-            let newBall, isValid = false;
-            for(let attempt=0; attempt<100; attempt++){
-                newBall = new Ball(r);
-                isValid = !balls.some(b => {
-                    const dx = b.x - newBall.x;
-                    const dy = b.y - newBall.y;
-                    return (dx*dx + dy*dy) < (b.radius + newBall.radius)**2;
-                });
-                if(isValid) break;
-            }
-            isValid && balls.push(newBall);
-        });
     }
 
-    // 高性能碰撞检测
-    function processCollisions() {
-        const GRID_SIZE = Math.max(CONFIG.MAX_RADIUS * 2.5, 100);
-        const grid = new Map();
+    // 碰撞检测
+    function handleCollisions() {
+        for (let i = 0; i < balls.length; i++) {
+            for (let j = i + 1; j < balls.length; j++) {
+                const b1 = balls[i];
+                const b2 = balls[j];
+                const dx = b2.x - b1.x;
+                const dy = b2.y - b1.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < b1.radius + b2.radius) {
+                    // 碰撞响应
+                    const angle = Math.atan2(dy, dx);
+                    const sin = Math.sin(angle);
+                    const cos = Math.cos(angle);
+                    
+                    // 位置修正
+                    const overlap = b1.radius + b2.radius - dist;
+                    b1.x -= overlap * cos * 0.5;
+                    b1.y -= overlap * sin * 0.5;
+                    b2.x += overlap * cos * 0.5;
+                    b2.y += overlap * sin * 0.5;
 
-        // 构建空间索引
-        balls.forEach((ball, i) => {
-            const x = Math.floor(ball.x / GRID_SIZE);
-            const y = Math.floor(ball.y / GRID_SIZE);
-            for(let dx=-1; dx<=1; dx++){
-                for(let dy=-1; dy<=1; dy++){
-                    const key = `${x+dx},${y+dy}`;
-                    grid.has(key) || grid.set(key, []);
-                    grid.get(key).push(i);
+                    // 速度交换
+                    const m1 = b1.radius;
+                    const m2 = b2.radius;
+                    const vx1 = b1.vx * cos + b1.vy * sin;
+                    const vy1 = b1.vy * cos - b1.vx * sin;
+                    const vx2 = b2.vx * cos + b2.vy * sin;
+                    const vy2 = b2.vy * cos - b2.vx * sin;
+                    
+                    const v1x = ((m1 - m2) * vx1 + 2 * m2 * vx2) / (m1 + m2);
+                    const v2x = ((m2 - m1) * vx2 + 2 * m1 * vx1) / (m1 + m2);
+                    
+                    b1.vx = v1x * cos - vy1 * sin;
+                    b1.vy = vy1 * cos + v1x * sin;
+                    b2.vx = v2x * cos - vy2 * sin;
+                    b2.vy = vy2 * cos + v2x * sin;
                 }
             }
-        });
-
-        // 处理碰撞
-        grid.forEach(cell => {
-            for(let i=0; i<cell.length; i++){
-                for(let j=i+1; j<cell.length; j++){
-                    const b1 = balls[cell[i]];
-                    const b2 = balls[cell[j]];
-                    const dx = b2.x - b1.x;
-                    const dy = b2.y - b1.y;
-                    const distSq = dx*dx + dy*dy;
-                    const minDist = b1.radius + b2.radius;
-
-                    if(distSq < minDist*minDist && distSq > 1) {
-                        const dist = Math.sqrt(distSq);
-                        const nx = dx / dist;
-                        const ny = dy / dist;
-
-                        // 强制分离
-                        const overlap = (minDist - dist) * 1.2;
-                        b1.x -= nx * overlap * (b2.radius/(b1.radius + b2.radius));
-                        b1.y -= ny * overlap * (b2.radius/(b1.radius + b2.radius));
-                        b2.x += nx * overlap * (b1.radius/(b1.radius + b2.radius));
-                        b2.y += ny * overlap * (b1.radius/(b1.radius + b2.radius));
-
-                        // 动量交换
-                        const vRel = {
-                            x: b1.vx - b2.vx,
-                            y: b1.vy - b2.vy
-                        };
-                        const velAlongNormal = vRel.x*nx + vRel.y*ny;
-
-                        if(velAlongNormal > 0) continue;
-
-                        const j = -(1 + CONFIG.RESTITUTION) * velAlongNormal /
-                                 (1/b1.mass + 1/b2.mass);
-
-                        b1.vx += (j * nx) / b1.mass;
-                        b1.vy += (j * ny) / b1.mass;
-                        b2.vx -= (j * nx) / b2.mass;
-                        b2.vy -= (j * ny) / b2.mass;
-                    }
-                }
-            }
-        });
+        }
     }
 
-    // 响应式布局
+    // 调整画布大小
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        canvas.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 0;
-            pointer-events: none;
-        `;
-        balls.forEach(ball => ball._resetPosition());
+        balls.length = 0;
+        initBalls();
     }
 
     // 动画循环
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        processCollisions();
+        handleCollisions();
         balls.forEach(ball => {
             ball.update();
             ball.draw();
@@ -198,36 +132,36 @@
         animationId = requestAnimationFrame(animate);
     }
 
-    // 初始化系统
+    // 初始化函数
     function init() {
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('orientationchange', resizeCanvas);
+        // 设置画布样式
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.zIndex = '-1';
+        canvas.style.pointerEvents = 'none';
+        
+        // 初始设置
         resizeCanvas();
-        initBalls();
         animate();
+        
+        // 窗口大小改变时重置
+        window.addEventListener('resize', resizeCanvas);
     }
 
     // 启动动画
-    document.readyState === 'complete' ? init() : window.addEventListener('load', init);
+    if (document.readyState === 'complete') {
+        init();
+    } else {
+        window.addEventListener('load', init);
+    }
 
-    // 控制接口
-    window.ballsController = {
-        setCount: (n) => {
-            CONFIG.BALL_COUNT = Math.min(15, Math.max(6, n));
-            balls.length = 0;
-            initBalls();
-        },
-        restart: () => {
-            balls.forEach(b => {
-                b._resetPosition();
-                b._initVelocity();
-            });
-        },
-        destroy: () => {
-            cancelAnimationFrame(animationId);
-            window.removeEventListener('resize', resizeCanvas);
-            window.removeEventListener('orientationchange', resizeCanvas);
-            canvas.remove();
+    // 提供销毁方法
+    window.destroyRedBalls = function() {
+        cancelAnimationFrame(animationId);
+        window.removeEventListener('resize', resizeCanvas);
+        if (canvas.parentNode) {
+            canvas.parentNode.removeChild(canvas);
         }
     };
 })();
