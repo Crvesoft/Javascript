@@ -1,5 +1,9 @@
 // github.com/Crvesoft/Javascript/blob/main/balls-collision.js
 // raw.githack.com/Crvesoft/Javascript/main/balls-collision.js
+
+// @license MIT
+// @version 1.0
+
 // red-balls-collision.js
 (function() {
     // 初始化画布
