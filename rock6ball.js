@@ -1,4 +1,3 @@
-// red-balls-collision.js
 (function() {
     // 初始化画布
     const canvas = document.createElement('canvas');
