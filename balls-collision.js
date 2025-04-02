@@ -1,4 +1,4 @@
-// balls-collision.js
+// red-balls-collision.js
 (function() {
     // 初始化画布
     const canvas = document.createElement('canvas');
@@ -39,7 +39,7 @@
         draw() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.strokeStyle = 'white';
+            ctx.strokeStyle = '#ff0000'; // 改为红色
             ctx.lineWidth = 2;
             ctx.stroke();
         }
@@ -157,7 +157,7 @@
     }
 
     // 提供销毁方法
-    window.destroyBallsAnimation = function() {
+    window.destroyRedBalls = function() {
         cancelAnimationFrame(animationId);
         window.removeEventListener('resize', resizeCanvas);
         if (canvas.parentNode) {
