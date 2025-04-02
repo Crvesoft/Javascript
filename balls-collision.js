@@ -1,4 +1,4 @@
-// github.com/Crvesoft/Javascript/edit/main/balls-collision.js
+// github.com/Crvesoft/Javascript/blob/main/balls-collision.js
 // raw.githack.com/Crvesoft/Javascript/main/balls-collision.js
 // red-balls-collision.js
 (function() {
