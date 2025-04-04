@@ -42,7 +42,7 @@ class Ball {
         this.x += this.vx;
         this.y += this.vy;
 
-        const maxSpeed = 10; // 速度为10
+        const maxSpeed = 13; // 速度为10
         const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
         if (speed > maxSpeed) {
             const scale = maxSpeed / speed;
@@ -52,7 +52,7 @@ class Ball {
 
         if (this.y + this.radius > canvas.height) {
             this.y = canvas.height - this.radius;
-            this.vy = -this.vy * 1.2; // 为1.2
+            this.vy = -this.vy * 1.2; // 为1.3
         }
 
         if (this.y - this.radius < 0) {
