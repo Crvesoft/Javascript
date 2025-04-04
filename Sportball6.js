@@ -5,7 +5,7 @@ canvas.height = window.innerHeight;
 canvas.style.position = 'fixed';
 canvas.style.top = '0';
 canvas.style.left = '0';
-canvas.style.zIndex = '0'; // 保持层级为0
+canvas.style.zIndex = '9999'; // 保持层级为0
 canvas.style.background = 'transparent'; // 背景透明
 document.body.appendChild(canvas);
 const ctx = canvas.getContext('2d');
