@@ -27,7 +27,7 @@ class Ball {
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.strokeStyle = this.color; // 边缘颜色
         ctx.lineWidth = 2; // 边缘宽度
-        ctx.globalAlpha = 0.6; // 60%透明度
+        ctx.globalAlpha = 0.8; // 80%透明度
         ctx.stroke(); // 绘制空心圆
         ctx.closePath();
 
