@@ -5,8 +5,8 @@ canvas.height = window.innerHeight;
 canvas.style.position = 'fixed';
 canvas.style.top = '0';
 canvas.style.left = '0';
-canvas.style.zIndex = '9999'; // 保持层级为0
-canvas.style.background = 'transparent'; // 背景透明
+canvas.style.zIndex = '9999';
+canvas.style.background = 'transparent';
 document.body.appendChild(canvas);
 const ctx = canvas.getContext('2d');
 
@@ -25,10 +25,10 @@ class Ball {
     draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = this.color; // 边缘颜色
-        ctx.lineWidth = 2; // 边缘宽度
-        ctx.globalAlpha = 0.8; // 80%透明度
-        ctx.stroke(); // 绘制空心圆
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.8;
+        ctx.stroke();
         ctx.closePath();
 
         ctx.shadowBlur = 10;
@@ -42,7 +42,7 @@ class Ball {
         this.x += this.vx;
         this.y += this.vy;
 
-        const maxSpeed = 10; // 速度为10
+        const maxSpeed = 10;
         const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
         if (speed > maxSpeed) {
             const scale = maxSpeed / speed;
@@ -52,7 +52,7 @@ class Ball {
 
         if (this.y + this.radius > canvas.height) {
             this.y = canvas.height - this.radius;
-            this.vy = -this.vy * 1.2; // 为1.2
+            this.vy = -this.vy * 1.2;
         }
 
         if (this.y - this.radius < 0) {
@@ -70,17 +70,17 @@ class Ball {
         }
 
         if (Math.abs(this.vx) < 0.1 && Math.abs(this.vy) < 0.1) {
-            this.vx += (Math.random() - 0.5) * 2; // 恢复为2
-            this.vy = -Math.random() * 5; // 恢复为5
+            this.vx += (Math.random() - 0.5) * 2;
+            this.vy = -Math.random() * 5;
         }
     }
 }
 
 // 生成低饱和度冷色系颜色
 function randomColor() {
-    const h = Math.random() * 180 + 120; // 色相范围120°-300°（冷色系）
-    const s = Math.random() * 20 + 10;   // 饱和度10%-30%
-    const l = Math.random() * 30 + 50;   // 亮度50%-80%
+    const h = Math.random() * 180 + 120;
+    const s = Math.random() * 20 + 10;
+    const l = Math.random() * 30 + 50;
     return `hsl(${h}, ${s}%, ${l}%)`;
 }
 
@@ -91,8 +91,8 @@ for (let i = 0; i < numBalls; i++) {
     const radius = Math.random() * 20 + 10;
     const x = Math.random() * (canvas.width - 2 * radius) + radius;
     const y = canvas.height - radius;
-    const vx = (Math.random() - 0.5) * 5; // 恢复为5
-    const vy = -Math.random() * 8 - 2;   // 恢复为8+2
+    const vx = (Math.random() - 0.5) * 5;
+    const vy = -Math.random() * 8 - 2;
     const color = randomColor();
     balls.push(new Ball(x, y, radius, color, vx, vy));
 }
@@ -108,7 +108,7 @@ function detectCollision(ballA, ballB) {
     return distance < ballA.radius + ballB.radius;
 }
 
-// 处理球体间碰撞
+// 处理球体间碰撞（增强横向幅度）
 function handleCollision(ballA, ballB) {
     const dx = ballB.x - ballA.x;
     const dy = ballB.y - ballA.y;
@@ -122,16 +122,18 @@ function handleCollision(ballA, ballB) {
     const u2x = ballB.vx;
     const u2y = ballB.vy;
 
-    const v1x = ((m1 - m2) * u1x + 2 * m2 * u2x) / (m1 + m2);
-    const v1y = ((m1 - m2) * u1y + 2 * m2 * u2y) / (m1 + m2);
-    const v2x = ((m2 - m1) * u2x + 2 * m1 * u1x) / (m1 + m2);
-    const v2y = ((m2 - m1) * u2y + 2 * m1 * u1y) / (m1 + m2);
+    // 计算碰撞后的速度，增强横向分量
+    const v1x = ((m1 - m2) * u1x + 2 * m2 * u2x) / (m1 + m2) * 1.5; // 横向放大1.5倍
+    const v1y = ((m1 - m2) * u1y + 2 * m2 * u2y) / (m1 + m2); // 纵向保持不变
+    const v2x = ((m2 - m1) * u2x + 2 * m1 * u1x) / (m1 + m2) * 1.5; // 横向放大1.5倍
+    const v2y = ((m2 - m1) * u2y + 2 * m1 * u1y) / (m1 + m2); // 纵向保持不变
 
     ballA.vx = v1x;
     ballA.vy = v1y;
     ballB.vx = v2x;
     ballB.vy = v2y;
 
+    // 分离重叠的球体
     const overlap = (ballA.radius + ballB.radius) - distance;
     if (overlap > 0) {
         const pushX = (dx / distance) * overlap * 0.5;
@@ -145,7 +147,7 @@ function handleCollision(ballA, ballB) {
 
 // 动画循环
 function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // 清屏保持透明背景
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     balls.forEach(ball => {
         ball.update();
