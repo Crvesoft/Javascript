@@ -5,7 +5,7 @@ canvas.height = window.innerHeight;
 canvas.style.position = 'fixed';
 canvas.style.top = '0';
 canvas.style.left = '0';
-canvas.style.zIndex = '10';
+canvas.style.zIndex = '50';
 canvas.style.background = 'transparent';
 document.body.appendChild(canvas);
 const ctx = canvas.getContext('2d');
