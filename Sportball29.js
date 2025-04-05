@@ -123,9 +123,9 @@ function handleCollision(ballA, ballB) {
     const u2y = ballB.vy;
 
     // 计算碰撞后的速度，增强横向分量
-    const v1x = ((m1 - m2) * u1x + 2 * m2 * u2x) / (m1 + m2); // 横向放大1.5倍
+    const v1x = ((m1 - m2) * u1x + 2 * m2 * u2x) / (m1 + m2) * 1.05; // 横向放大1.5倍
     const v1y = ((m1 - m2) * u1y + 2 * m2 * u2y) / (m1 + m2); // 纵向保持不变
-    const v2x = ((m2 - m1) * u2x + 2 * m1 * u1x) / (m1 + m2); // 横向放大1.5倍
+    const v2x = ((m2 - m1) * u2x + 2 * m1 * u1x) / (m1 + m2) * 1.05; // 横向放大1.5倍
     const v2y = ((m2 - m1) * u2y + 2 * m1 * u1y) / (m1 + m2); // 纵向保持不变
 
     ballA.vx = v1x;
