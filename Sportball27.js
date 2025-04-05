@@ -86,7 +86,7 @@ function randomColor() {
 
 // 创建球体数组
 const balls = [];
-const numBalls = 50;
+const numBalls = 30;
 for (let i = 0; i < numBalls; i++) {
     const radius = Math.random() * 20 + 10;
     const x = Math.random() * (canvas.width - 2 * radius) + radius;
