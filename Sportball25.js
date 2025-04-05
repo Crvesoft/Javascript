@@ -5,7 +5,7 @@ canvas.height = window.innerHeight;
 canvas.style.position = 'fixed';
 canvas.style.top = '0';
 canvas.style.left = '0';
-canvas.style.zIndex = '19';
+canvas.style.zIndex = '1';
 canvas.style.background = 'transparent';
 document.body.appendChild(canvas);
 const ctx = canvas.getContext('2d');
@@ -86,7 +86,7 @@ function randomColor() {
 
 // 创建球体数组
 const balls = [];
-const numBalls = 10;
+const numBalls = 20;
 for (let i = 0; i < numBalls; i++) {
     const radius = Math.random() * 20 + 10;
     const x = Math.random() * (canvas.width - 2 * radius) + radius;
